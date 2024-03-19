@@ -10,11 +10,8 @@
 
 * Give ~std::optional~ Range Support
   \\
-  \\
   [[https://wg21.link/p3168r0]]
-  \\
-  \\
-  \\
+
   Marco Foco <marco.foco@gmail.com> \\
   Darius Neațu <dariusn@adobe.com> \\
   Barry Revzin <barry.revzin@gmail.com> \\
@@ -46,7 +43,7 @@
    - Applying range and iteration algorithms to ~std::optional~ is a recurring
      topic in forums
    - Optional types with range support are showing up in the wild (e.g.
-     ~owi::optional~)
+     [[https://github.com/seleznevae/owi_optional][~owi::optional~]])
    - Other programming languages (e.g. Rust and Scala) treat optional as a range
      for algorithmic purposes
 
@@ -62,6 +59,7 @@
 
 ** Interface differences 1/2
 
+    #+REVEAL_HTML: <div style="font-size: 80%;">
     | ~std::optional<V>~ | both               | ~std::maybe_view<V>~ |
     |--------------------+--------------------+----------------------|
     | ~Opt(nullopt)~     | ~Opt()~            |                      |
@@ -71,9 +69,11 @@
     | ~o.emplace(v);~    |                    |                      |
     | ~o.reset();~       |                    |                      |
     | ~o.swap(o2);~      |                    |                      |
+    #+REVEAL_HTML: </div>
 
 ** Interface differences 2/2
 
+    #+REVEAL_HTML: <div style="font-size: 80%;">
     | ~std::optional<V>~            | both                     | ~std::maybe_view<V>~      |
     |-------------------------------+--------------------------+---------------------------|
     |                               | ~o == o2~ and ~o <=> o2~ |                           |
@@ -82,13 +82,19 @@
     | ~o.has_value()~ and ~bool(o)~ | ~o.and_then(f)~          | ~o.size()~                |
     | ~o.value_or(v)~               | ~o.or_else(f)~           | ~o.data()~                |
     | ~std::hash<Opt>{}(o)~         |                          |                           |
+    #+REVEAL_HTML: </div>
 
 * Key design principles
+  \\
+  \\
+  #+REVEAL_HTML: <div style="font-size: 170%;">
   1. Genericity
   2. Simplicity
+  #+REVEAL_HTML: </div>
 
 ** Genericity 1/2
    [[http://stepanovpapers.com/DeSt98.pdf][Fundamentals of Generic Programming]], Stepanov and Dehnert
+   #+REVEAL_HTML: <div style="font-size: 80%;">
    #+begin_quote
    Generic programming recognizes that dramatic productivity improvements must
    come from reuse without modification, as with the successful libraries.
@@ -99,8 +105,10 @@
    variety of components share the same interface so that they can be
    substituted for one another.
    #+end_quote
+   #+REVEAL_HTML: </div>
 
 ** Genericity 2/2
+   #+REVEAL_HTML: <div style="font-size: 80%;">
    #+begin_quote
    It is vital that we go beyond the old library model of reusing identical
    interfaces with pre-determined types, to one which identifies the minimal
@@ -111,9 +119,10 @@
    well as development of techniques for effectively mapping one interface to
    another.
    #+end_quote
+   #+REVEAL_HTML: </div>
 
 ** Simplicity
-
+   \\
    [[https://wg21.link/P2000R4][Direction for ISO C++ (P2000R4)]], Direction Group
    #+begin_quote
    C++ in danger of losing coherency due to proposals based on differing and
@@ -154,7 +163,7 @@
    /Let's not force users to spend mental energy like this!/
 
 * Our proposal
-
+  \\
   Instead of introducing a new type, make ~std::optional~ satisfy the
   ~ranges::range~ concept where iterating over a ~std::optional~ object will
   iterate over its 0 or 1 elements.
@@ -172,27 +181,28 @@
    vector<Person> people = ...;
    #+end_src
 
-
+   #+REVEAL_HTML: <div style="float: left; width: 50%;">
    #+begin_src C++
-// Compute eye colors of 'people'.
-vector<string> eye_colors = people
-  | views::transform(&Person::eye_color)
-  | views::transform(views::nullable)
-  | views::join
-  | ranges::to<set>()
-  | ranges::to<vector>();
+   // Compute eye colors of 'people'.
+   vector<string> eye_colors = people
+     | views::transform(&Person::eye_color)
+     | views::transform(views::nullable)
+     | views::join
+     | ranges::to<set>()
+     | ranges::to<vector>();
    #+end_src
-
+   #+REVEAL_HTML: </div>
+   #+REVEAL_HTML: <div style="float: right; width: 50%;">
    #+begin_src C++
-// Compute eye colors of 'people'.
-vector<string> eye_colors = people
-  | views::transform(&Person::eye_color)
-  // no extra wrapping necessary
-  | views::join
-  | ranges::to<set>()
-  | ranges::to<vector>();
-   #+end_src
-
+   // Compute eye colors of 'people'.
+   vector<string> eye_colors = people
+     | views::transform(&Person::eye_color)
+     // no extra wrapping necessary
+     | views::join
+     | ranges::to<set>()
+     | ranges::to<vector>();
+      #+end_src
+   #+REVEAL_HTML: </div>
 ** Every example from ~views::maybe~ gets simpler
 
 * Design particulars (rationale in paper)
